@@ -1,0 +1,62 @@
+generator client {
+  provider   = "prisma-client-js"
+  engineType = "library"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("LOCAL_DATABASE_URL")
+}
+
+
+model Category {
+  id             String     @id @default(cuid())
+  name           String
+  slug           String     @unique
+  description    String?
+  parentId       String?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  image          String?
+  Category       Category?  @relation("CategoryToCategory", fields: [parentId], references: [id])
+  other_Category Category[] @relation("CategoryToCategory")
+  Product        Product[]
+}
+
+model Product {
+  id                   String         @id @default(cuid())
+  name                 String
+  slug                 String         @unique
+  brand                String?
+  technicalDescription String?
+  specifications       String?
+  pdfFile              String?
+  images               String         @default("[]")
+  categoryId           String
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  Category             Category       @relation(fields: [categoryId], references: [id])
+  QuoteRequest         QuoteRequest[]
+}
+
+model QuoteRequest {
+  id           String   @id @default(cuid())
+  customerName String
+  email        String
+  phone        String?
+  message      String?
+  status       String   @default("pending")
+  productId    String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  Product      Product? @relation(fields: [productId], references: [id])
+}
+
+model SiteSetting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  type      String   @default("string")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
